@@ -357,6 +357,7 @@ $(async function() {
         const storyId = $(this).parent().attr("id");
         try {
             await currentUser.deleteStory(storyId);
+            $editArticleForm.hide();
             await loadPage();
         } catch (e) {
             console.log(e);
