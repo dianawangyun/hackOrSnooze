@@ -16,10 +16,9 @@ $(async function() {
 
     // global storyList variable
     let storyList = null;
-
     // global currentUser variable
     let currentUser = null;
-
+    let currentPage = null;
     await loadPage();
 
     /* --------------------Load Page----------------------- */
@@ -38,15 +37,20 @@ $(async function() {
         //  to get an instance of User with the right details
         //  this is designed to run once, on page load
         currentUser = await User.getLoggedInUser(token, username);
-        await generateStories();
 
         if (currentUser) {
             showNavForLoggedInUser();
-            await generateFavStories();
-            await generateMyStory();
         }
-    }
 
+        if (currentPage === "favorites" && currentUser) {
+            await generateFavStories();
+        } else if (currentPage === "myStory" && currentUser) {
+            await generateMyStory();
+        } else {
+            await generateStories();
+        }
+
+    }
 
     /**
      * A rendering function to run to reset the forms and hide the login info
@@ -254,6 +258,7 @@ $(async function() {
 
     $("body").on("click", "#nav-all", async function() {
         hideElements();
+        currentPage = "stories";
         await loadPage();
         $allStoriesList.show();
     });
@@ -263,14 +268,19 @@ $(async function() {
         $submitForm.show();
     })
 
-    $("#nav-favorites").on("click", function() {
+    $("#nav-favorites").on("click", async function() {
         hideElements();
+        currentPage = "favorites";
+        await loadPage();
         $favoritedArticles.show();
     })
 
-    $("#nav-user-stories").on("click", function() {
+    $("#nav-user-stories").on("click", async function() {
         hideElements();
+        currentPage = "myStory";
+        await loadPage();
         $ownStories.show();
+
     })
 
 
@@ -305,7 +315,7 @@ $(async function() {
         const isFav = $(this).find("i").hasClass("fas");
         try {
             await currentUser.toggleFav(storyId, isFav);
-            await loadPage();
+            await loadPage(currentPage);
         } catch (e) {
             console.log(e);
         }
@@ -313,6 +323,7 @@ $(async function() {
 
     // generate a list for favorite stories
     async function generateFavStories() {
+
         $favoritedArticles.empty();
         // loop through favorites of user and generate HTML for them
         if (currentUser.favorites.length === 0) {
@@ -329,6 +340,7 @@ $(async function() {
 
     /* -------------------User Story-------------------- */
     async function generateMyStory() {
+
         $ownStories.empty();
         if (currentUser.ownStories.length === 0) {
             $ownStories.text("No stories added by user yet!");

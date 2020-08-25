@@ -163,7 +163,7 @@ class User {
         const url = `${BASE_URL}/users/${this.username}/favorites/${storyId}`;
         if (isFav) {
             await axios.delete(url, {
-                data: {
+                params: {
                     token: this.loginToken
                 }
             });
@@ -177,7 +177,7 @@ class User {
     async deleteStory(storyId) {
         const url = `${BASE_URL}/stories/${storyId}`;
         await axios.delete(url, {
-            data: {
+            params: {
                 token: this.loginToken
             }
         });
